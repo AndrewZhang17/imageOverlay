@@ -12,6 +12,8 @@ RESULT_IMAGE_NAME = "result.png"
 overlay = cv2.imread(OVERLAY_IMAGE_NAME, cv2.IMREAD_UNCHANGED)
 
 def addOverlay(background, foreground):
+    foreground = cv2.resize(foreground, (background.shape[0], background.shape[1]))
+
     # normalize alpha channels from 0-255 to 0-1
     if len(background[0,0]) == 3:
         background = cv2.cvtColor(background, cv2.COLOR_RGB2RGBA)
