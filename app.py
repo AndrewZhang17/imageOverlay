@@ -1,4 +1,15 @@
+import os
+from flask import Flask, request, render_template, send_from_directory
 import cv2
+
+app = Flask(__name__)
+
+HTML_TEMPLATE = "upload_image.html"
+BACKGROUND_IMAGE_NAME = "background.png"
+OVERLAY_IMAGE_NAME = "overlay.png"
+RESULT_IMAGE_NAME = "result.png"
+
+overlay = cv2.imread(OVERLAY_IMAGE_NAME, cv2.IMREAD_UNCHANGED)
 
 def addOverlay(background, foreground):
     # normalize alpha channels from 0-255 to 0-1
@@ -15,12 +26,21 @@ def addOverlay(background, foreground):
 
     return background
 
-if __name__=="__main__":
-    img = cv2.imread("img.png", cv2.IMREAD_UNCHANGED)
-    overlay = cv2.imread("overlay.png", cv2.IMREAD_UNCHANGED)
+@app.route("/", methods=["GET", "POST"])
+def upload_image():
+    if request.method == "POST":
+        if request.files:
+            image = request.files["image"]
+            if image:
+                image.save(BACKGROUND_IMAGE_NAME)
 
-    result = addOverlay(img, overlay)
+                img = cv2.imread(BACKGROUND_IMAGE_NAME, cv2.IMREAD_UNCHANGED)
+                result = addOverlay(img, overlay)
+                cv2.imwrite(RESULT_IMAGE_NAME, result)
 
-    cv2.imwrite("result.png", result)
-    cv2.imshow("result", result)
-    cv2.waitKey(0)
+                return render_template(HTML_TEMPLATE, uploaded_image=RESULT_IMAGE_NAME)
+    return render_template(HTML_TEMPLATE)
+
+@app.route("/uploads/<filename>")
+def send_uploaded_file(filename=""):
+    return send_from_directory(".", filename)
