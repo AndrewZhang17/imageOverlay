@@ -1,2 +1,2 @@
 Flask==2.2.2
-opencv_python==4.6.0.66
+opencv_python-headless==4.6.0.66
